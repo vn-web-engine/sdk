@@ -1,0 +1,17 @@
+{
+    "theme_color": "#000000",
+    "background_color": "#ffffff",
+    "display": "minimal-ui",
+    "scope": "/",
+    "start_url": "/",
+    "name": "Simple Doc Sign",
+    "short_name": "Simple Doc Sign",
+    "icons": [
+        {
+            "src": "/icons/icon-128x128.png",
+            "sizes": "128x128",
+            "type": "image/png"
+        }
+    ],
+    "description": "Simple documents signing service"
+}

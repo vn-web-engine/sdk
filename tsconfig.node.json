@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "composite": true,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "typeRoots": [ "./node_modules/@types", "./src/global.d.ts" ],
+        "paths": {
+            "@components/*": [ "./src/components/*" ],
+            "@pages/*": [ "./src/pages/*" ],
+            "@stores/*": [ "./src/stores/*" ]
+        }
+    },
+    "include": [ "vite.config.ts" ],
+}
