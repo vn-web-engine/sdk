@@ -4,6 +4,7 @@ import Animation from "./sdk/utils/animation/Animation"
 import AnimationFunctions from "./sdk/utils/animation/AnimationFunctions"
 
 import "./Main.scss"
+import AnimationSequence from "./sdk/utils/animation/AnimationSequence"
 
 function Main () {
     const engine = new Engine()
@@ -22,16 +23,20 @@ function Main () {
         from: 20,
         to: 400,
         update (current: number) {
-            console.log(current)
             circle1.radius = Number.parseInt(String(current))
         },
         transform: AnimationFunctions.easeInOutCubic
     })
 
-    moveAnim.start(2000).then(anim => {
-        anim.reverse()
-        anim.start(2000)
-    })
+    const sequence = new AnimationSequence()
+
+    sequence.addAnimation(moveAnim, moveAnim, moveAnim)
+        .addAnimationReversePoints(1)
+        .setAnimationCustomTime(2, 1000)
+
+    sequence.start(3000)
+
+    setTimeout(() => sequence.stop(), 1000)
 }
 
 Main()

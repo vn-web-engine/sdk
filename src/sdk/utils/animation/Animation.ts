@@ -52,5 +52,5 @@ export default class Animation {
 
     public stop () { this.stopFlag = true; return this }
 
-    public reverse () { this.reverseFlag = true; return this }
+    public reverse () { this.reverseFlag = !this.reverseFlag; return this }
 }
