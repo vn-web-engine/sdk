@@ -1,9 +1,9 @@
 import { Random } from "@knownout/lib"
-import Entity from "../entities/Entity"
+import AbstractEntity from "../entities/AbstractEntity"
 import EntityIndex from "./EntityIndex"
 
 export default class EntityMap {
-    readonly #map: Map<string, Entity> = new Map<string, Entity>()
+    readonly #map: Map<string, AbstractEntity> = new Map<string, AbstractEntity>()
 
     private readonly render: () => void
 
@@ -17,13 +17,15 @@ export default class EntityMap {
         this.render = render
     }
 
-    public add (entity: Entity) {
+    public add (entity: AbstractEntity) {
         const identifier = this.getIdentifier()
 
         entity.setEntityIndex(new EntityIndex(identifier))
             .setRenderer(this.render)
 
         this.#map.set(identifier, entity)
+
+        this.render()
 
         return new EntityIndex(identifier)
     }

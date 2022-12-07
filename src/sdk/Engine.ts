@@ -1,12 +1,19 @@
-import Entity from "./entities/Entity"
+import AbstractAsset from "./assets/AbstractAsset"
+import AssetNotFoundException from "./exceptions/AssetNotFoundException"
 import EngineInitException from "./exceptions/EngineInitException"
-import Layer from "./utils/Layer"
-import LayersMap from "./utils/LayersMap"
+import AssetsProcessor from "./processors/AssetsProcessor"
+import LayersProcessor from "./processors/LayersProcessor"
+
+type TAssetsLoadingUpdateCallback = (assetData: { asset: AbstractAsset, name: string }, loadingData: {
+    current: number, total: number, percentsLoaded: number
+}) => void
 
 export default class Engine {
-    private readonly context: CanvasRenderingContext2D
+    public readonly context: CanvasRenderingContext2D
 
-    public readonly layersMap: LayersMap
+    public readonly layers: LayersProcessor
+
+    public readonly assets: AssetsProcessor
 
     constructor () {
         this.render = this.render.bind(this)
@@ -24,48 +31,33 @@ export default class Engine {
         document.body.childNodes.forEach(node => node.remove())
         document.body.append(canvasElement)
 
-        this.layersMap = new LayersMap(this.render)
+        this.layers = new LayersProcessor(context, this.render)
+        this.assets = new AssetsProcessor()
     }
 
-    public addLayer (index?: number, replace = false) {
-        const layer = new Layer(this.context, this.render)
+    public async loadAssets (updateCallback?: TAssetsLoadingUpdateCallback): Promise<void> {
+        let currentIndex = 0
 
-        this.layersMap.addLayer(layer, index, replace)
+        for await (const [ name, asset ] of this.assets.assetsMap) {
+            currentIndex++
 
-        return layer
-    }
+            updateCallback?.({ asset, name }, {
+                current: currentIndex,
+                total: this.assets.assetsMap.size,
+                percentsLoaded: this.assets.assetsMap.size / currentIndex
+            })
 
-    public addEntity (layer: Layer, entity: Entity) {
-        layer.entitiesMap.add(entity)
+            const result = await asset.loadAssetContent()
 
-        return this
-    }
-
-    public findEntityLayer (entity: Entity) {
-        if (!entity.entityIndex) return false
-
-        for (const [ index, layer ] of this.layersMap.layers) {
-            if (layer.entitiesMap.get(entity.entityIndex)) return index
+            if (!result) throw new AssetNotFoundException(asset.assetURL)
         }
-
-        return false
-    }
-
-    public deleteEntity (entity: Entity) {
-        if (!entity.entityIndex) return false
-
-        const entityLayer = this.findEntityLayer(entity)
-
-        if (entityLayer === false) return false
-
-        return this.layersMap.getLayer(entityLayer)?.entitiesMap.delete(entity.entityIndex)
     }
 
     public render () {
         window.requestAnimationFrame(() => {
             this.context.clearRect(0, 0, this.context.canvas.width, this.context.canvas.height)
 
-            this.layersMap.layersOnly.forEach(layer => {
+            this.layers.layersMap.layersOnly.forEach(layer => {
                 this.context.beginPath()
                 layer.entitiesMap.entities.forEach(entity => entity.draw(this.context))
 

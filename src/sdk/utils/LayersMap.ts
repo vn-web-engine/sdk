@@ -24,7 +24,7 @@ export default class LayersMap {
     }
 
     public deleteLayer (index: number, shift = false): boolean {
-        const result = this.#map.delete(index)
+        let result = this.#map.delete(index)
 
         if (!shift) return result
 
@@ -35,7 +35,11 @@ export default class LayersMap {
             this.#map.set(i, next)
         }
 
-        return this.#map.delete(this.#map.size - 1)
+        result = this.#map.delete(this.#map.size - 1)
+
+        this.render()
+
+        return result
     }
 
     public swapLayers (firstIndex: number, secondIndex: number): boolean {
